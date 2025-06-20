@@ -522,17 +522,17 @@ orden: 23
 
 **Descripción técnica detallada:**
 
-Desarrollar la primera versión funcional del sistema de **barracón**, donde el jugador puede gestionar sus unidades disponibles, ver sus estadísticas y crear combinaciones de tropas (loadouts) que luego podrá desplegar en combate. Este sistema no requiere lógica de progresión ni restricciones por rareza para el MVP, pero sí debe contemplar su extensión futura. El enfoque está en funcionalidad mínima, claridad visual y persistencia básica.
+Desarrollar la primera versión funcional del sistema de **barracón**, donde el jugador puede gestionar las **tropas** disponibles (plantillas de escuadra o *Troops*), ver sus estadísticas y crear combinaciones para usarlas en combate como **loadouts**. Cada *Troop* representa una escuadra homogénea completa que consume un valor fijo de liderazgo. El sistema no requiere lógica de progresión ni restricciones por rareza para el MVP, pero sí debe contemplar su extensión futura. El enfoque está en funcionalidad mínima, claridad visual y persistencia básica.
 
 ---
 
 ### 🎮 **Funcionalidades requeridas:**
 
-- Visualización de unidades disponibles para el jugador:
-    - Nombre, tipo, rareza, nivel, liderazgo, moral, ícono.
+- Visualización de **tropas** disponibles para el jugador (plantillas `Troop`):
+     - Nombre, tipo, rareza, nivel, liderazgo por escuadra, moral, ícono.
 - Interface para crear un loadout:
-    - Seleccionar unidades según puntos de liderazgo disponibles.
-    - Máximo de 1 escuadra para el MVP, con posibilidad de escalar.
+     - Seleccionar **tropas completas** según el liderazgo disponible del héroe.
+     - Máximo de 1 *Troop* (una escuadra) para el MVP, con posibilidad de escalar.
 - Guardar y cargar configuraciones de tropas (`Loadout 1`, `Loadout 2`, etc.).
 - Vista previa básica (ícono o modelo simple).
 - Confirmación para asignar el loadout actual como el activo antes de entrar en partida.
@@ -543,8 +543,8 @@ Desarrollar la primera versión funcional del sistema de **barracón**, donde el
 
 - Panel de UI llamado `BarracksPanel` dentro de `/UI/Barracks/`.
 - Script de gestión: `BarracksManager.cs`.
-- Clase `UnitData` para contener información de cada unidad desbloqueada.
-- Estructura de `Loadout` que contenga una lista de unidades + ID de configuración.
+- Clase `TroopData` para contener la plantilla de cada tropa disponible.
+- Estructura de `Loadout` que contenga una lista de `TroopData` y un ID de configuración.
 - Datos serializados en PlayerPrefs o ScriptableObject para persistencia local (para MVP).
 - Integración con sistema de liderazgo para validar el coste total del loadout.
 
@@ -1944,7 +1944,7 @@ Construir un entorno de terreno básico en Unity que sirva como espacio funciona
 
 # Crear UI de entrada a batalla
 
-Descripción: Interfaz previa al combate donde el jugador selecciona las unidades y el arma que llevará a la partida, respetando su límite de liderazgo.
+Descripción: Interfaz previa al combate donde el jugador selecciona las **tropas** (plantillas `Troop`) y el arma que llevará a la partida, respetando su límite de liderazgo por escuadras.
 Prioridad: Alta
 Etiquetas: Preparación, UI
 Etapa: Backlog
@@ -1964,8 +1964,8 @@ Diseñar una interfaz funcional y clara que permita al jugador configurar su des
 ### 🎮 **Funcionalidades requeridas:**
 
 - Mostrar todas las unidades **disponibles del jugador**:
-    - Icono, nombre, tipo, rareza, coste de liderazgo.
-- Permitir **selección manual de unidades**, validando en tiempo real el total de liderazgo.
+    - Icono, nombre, tipo, rareza, coste de liderazgo por escuadra.
+- Permitir **selección manual de tropas**, validando en tiempo real el total de liderazgo.
 - Mostrar **barra de liderazgo restante** (ej. “Liderazgo: 5/10”).
 - Botón para cargar un **loadout guardado** desde el barracón (si aplica).
 - Lista de **armas disponibles para el héroe**:
@@ -1989,7 +1989,7 @@ Diseñar una interfaz funcional y clara que permita al jugador configurar su des
     - `LoadoutManager` para cargar configuraciones guardadas.
     - `HeroInventory` o equivalente para lista de armas disponibles.
 - Debe guardar:
-    - Lista de unidades seleccionadas para despliegue.
+    - Lista de **tropas** seleccionadas para despliegue.
     - Arma activa seleccionada del héroe.
 - Validaciones en tiempo real antes de habilitar el botón "Confirmar".
 
@@ -1997,8 +1997,8 @@ Diseñar una interfaz funcional y clara que permita al jugador configurar su des
 
 ### 🧪 **Criterios de aceptación**
 
-- El jugador puede seleccionar unidades hasta agotar su liderazgo sin pasarse.
-- Puede alternar entre elegir unidades manualmente o cargar un loadout.
+ - El jugador puede seleccionar **tropas** hasta agotar su liderazgo sin pasarse.
+ - Puede alternar entre elegir **tropas** manualmente o cargar un loadout.
 - Puede elegir un arma válida para el héroe.
 - Si la selección es válida, el botón “Confirmar” permite avanzar a partida.
 - Si hay errores (sin tropas, sin arma, liderazgo excedido), se muestra retroalimentación clara.
@@ -2791,7 +2791,7 @@ orden: 24
 
 **Descripción técnica detallada:**
 
-Implementar un sistema que permita al jugador guardar combinaciones de tropas previamente seleccionadas en el barracón o en la UI de entrada a batalla. Estas combinaciones, llamadas *loadouts*, deben almacenarse de forma persistente y poder recuperarse fácilmente para su uso en futuras partidas. Cada loadout debe respetar el límite de liderazgo del jugador y contener metainformación suficiente para mostrarse en interfaces previas al combate.
+Implementar un sistema que permita al jugador guardar combinaciones de **tropas completas** (*Troops*) previamente seleccionadas en el barracón o en la UI de entrada a batalla. Estas combinaciones, llamadas *loadouts*, deben almacenarse de forma persistente y poder recuperarse fácilmente para su uso en futuras partidas. Cada loadout debe respetar el límite de liderazgo del jugador (sumando el coste de cada escuadra) y contener metainformación suficiente para mostrarse en interfaces previas al combate.
 
 ---
 
@@ -2799,7 +2799,7 @@ Implementar un sistema que permita al jugador guardar combinaciones de tropas pr
 
 - Posibilidad de guardar hasta 3 loadouts diferentes (mínimo para MVP).
 - Cada loadout debe almacenar:
-    - Lista de unidades seleccionadas.
+    - Lista de **tropas** (`Troops`) seleccionadas.
     - Fecha/hora de creación o nombre personalizado (opcional).
 - Mostrar botón “Guardar como Loadout” desde:
     - UI del barracón.
@@ -2812,7 +2812,7 @@ Implementar un sistema que permita al jugador guardar combinaciones de tropas pr
 ### ⚙️ **Requisitos técnicos**
 
 - Clase `LoadoutData` con:
-    - Lista de `UnitID`s o referencias a `UnitData`.
+    - Lista de `TroopID`s o referencias a `TroopData`.
     - Campo `loadoutName` o `slotIndex`.
     - Coste total de liderazgo.
 - Sistema de almacenamiento persistente:
@@ -4161,7 +4161,7 @@ Recibir los datos generados al finalizar la batalla y distribuirlos a la interfa
 
 # Lógica de exclusividad de escuadra activa
 
-Descripción: Asegurar que cada jugador tenga solo una escuadra activa en el campo al mismo tiempo y gestionar su reemplazo de forma segura.
+Descripción: Asegurar que cada jugador tenga solo una escuadra activa en el campo al mismo tiempo y gestionar su reemplazo de forma segura. Cada escuadra es una instancia derivada de una *Troop* seleccionada en el loadout.
 Prioridad: Media
 Etiquetas: Supply, Unidades
 Etapa: Backlog
@@ -4409,7 +4409,7 @@ orden: 27
 
 **Descripción técnica detallada:**
 
-Al ingresar a una batalla desde el lobby, los jugadores deben pasar por una **fase de preparación** representada por una **pantalla de interfaz completa**. Esta UI debe contener todos los componentes necesarios para que el jugador configure su escuadra: selección de unidades (sin superar el liderazgo), punto de spawn, y uso opcional de loadouts. La interfaz debe ocupar toda la pantalla, suspender el control del personaje, y mantenerse visible durante la cuenta regresiva. Además, debe integrarse con los botones “Continuar” y mostrar un temporizador visible.
+Al ingresar a una batalla desde el lobby, los jugadores deben pasar por una **fase de preparación** representada por una **pantalla de interfaz completa**. Esta UI debe contener todos los componentes necesarios para que el jugador configure su escuadra: selección de **tropas** (sin superar el liderazgo por escuadras), punto de spawn y uso opcional de loadouts. La interfaz debe ocupar toda la pantalla, suspender el control del personaje y mantenerse visible durante la cuenta regresiva. Además, debe integrarse con los botones “Continuar” y mostrar un temporizador visible.
 
 ---
 
@@ -4419,7 +4419,7 @@ Al ingresar a una batalla desde el lobby, los jugadores deben pasar por una **fa
     - Bloquea input de juego.
     - Fondo neutro o mapa estilizado como fondo.
 - **Componentes integrados:**
-    - **Selector de unidades (slots + panel modal)** con liderazgo limitado.
+    - **Selector de tropas (slots + panel modal)** con liderazgo limitado.
     - **Mini mapa con puntos de spawn** interactivos.
     - **Selector de loadouts** si el jugador tiene alguno guardado.
     - **Contador de tiempo** restante para confirmar selección.
@@ -4792,7 +4792,7 @@ El cambio de arma no se activa por teclado libre, sino al **interactuar con el e
 
 # Permitir cambio de escuadra dentro de zona de Supply
 
-Descripción: Reemplazar la escuadra activa del jugador desde una interfaz integrada accesible al interactuar con el objeto central del Supply Point.
+Descripción: Reemplazar la escuadra activa del jugador desde una interfaz integrada accesible únicamente al interactuar con el objeto central del Supply Point. El sistema siempre mantiene una sola escuadra activa por jugador.
 Prioridad: Media
 Etiquetas: Spawning, Supply, UI
 Etapa: Backlog
@@ -4817,7 +4817,7 @@ El jugador puede cambiar su escuadra activa mientras se encuentra en el rango de
 - Se abre una UI integrada que muestra:
     - Panel de selección de escuadra (como en fase de preparación).
     - Escuadra actual destacada.
-    - Otras escuadras válidas (con >10% de tropas vivas).
+    - Otras **tropas** válidas (con >10% de tropas vivas) independientemente de la escuadra activa.
 - Al seleccionar una nueva escuadra:
     - La escuadra actual comienza un temporizador de desaparición (5 segundos).
     - La nueva escuadra se instancia dentro del área del Supply Point.
@@ -4832,7 +4832,7 @@ El jugador puede cambiar su escuadra activa mientras se encuentra en el rango de
     - Evento `OnInteract → OpenSupplyPointUI()`
 - UI reutilizada:
     - Reusar el panel de escuadra de la preparación de batalla (`SquadSelectionPanel`)
-    - Mostrar visual bloqueado para escuadras inválidas (ver Subtarea 3)
+    - Mostrar visual bloqueado para **tropas** inválidas (ver Subtarea 3)
 - Script `SquadManager.cs`:
     - `DeactivateCurrentSquad(delay)`
     - `SpawnSquadFromLoadoutAt(Vector3 position)`
@@ -4845,6 +4845,7 @@ El jugador puede cambiar su escuadra activa mientras se encuentra en el rango de
 - El jugador puede acceder al cambio de escuadra solo si está en un Supply Point aliado.
 - La UI integrada muestra correctamente escuadra actual y opciones válidas.
 - Escuadras con ≤10% efectivos están visibles pero no seleccionables.
+- La escuadra activa actual no afecta qué tropas están disponibles para el cambio.
 - Al hacer el cambio:
     - La escuadra anterior se desactiva y desaparece a los 5 segundos.
     - La nueva aparece en el rango del Supply Point y queda lista para usar.
@@ -4886,7 +4887,7 @@ Durante el proceso de cambio de escuadra en un Supply Point, el sistema debe fil
 ### 🎮 **Funcionalidades requeridas:**
 
 - Evaluar el estado de cada escuadra disponible al abrir la UI de cambio:
-    - Calcular el porcentaje de unidades vivas.
+    - Calcular el porcentaje de unidades vivas de cada **tropa**.
     - Si es ≤10%, marcar como inhabilitada.
 - Visual en la UI:
     - Desaturar o apagar visualmente la card de la escuadra.
@@ -5103,7 +5104,7 @@ orden: 25
 
 **Descripción técnica detallada:**
 
-Durante la fase de preparación de batalla, el jugador puede elegir un loadout previamente guardado que contenga una combinación válida de unidades dentro de su límite de liderazgo. Este selector debe mostrar los loadouts disponibles, aplicar la configuración al instante, y reflejarlo en la interfaz de selección de unidades. Debe prevenir selecciones inválidas y asegurar sincronización visual.
+Durante la fase de preparación de batalla, el jugador puede elegir un loadout previamente guardado que contenga una combinación válida de **tropas** (escuadras completas) dentro de su límite de liderazgo. Este selector debe mostrar los loadouts disponibles, aplicar la configuración al instante y reflejarla en la interfaz de selección. Debe prevenir selecciones inválidas y asegurar sincronización visual.
 
 ---
 
@@ -5112,11 +5113,11 @@ Durante la fase de preparación de batalla, el jugador puede elegir un loadout p
 - Mostrar lista de loadouts previamente guardados por el jugador.
 - Cada loadout debe contener:
     - Nombre personalizado.
-    - Lista de unidades incluidas.
-    - Coste total de liderazgo.
+    - Lista de **tropas** (escuadras) incluidas.
+    - Coste total de liderazgo por escuadras.
 - Al seleccionar un loadout:
-    - Se aplica automáticamente la composición de unidades.
-    - Se bloquean unidades que el jugador no tiene disponibles.
+    - Se aplica automáticamente la composición de **tropas**.
+    - Se bloquean tropas que el jugador no tiene disponibles.
     - Se actualiza la UI para reflejar la nueva selección.
 - Debe haber opción de volver a selección manual si se desea.
 
@@ -5128,7 +5129,7 @@ Durante la fase de preparación de batalla, el jugador puede elegir un loadout p
     - Lista dinámica que muestra cada loadout (`LoadoutData`).
     - Método `ApplyLoadout(LoadoutData loadout)` que:
         - Vacía la selección actual.
-        - Añade cada unidad si está desbloqueada y no supera el liderazgo.
+        - Añade cada **tropa** si está desbloqueada y no supera el liderazgo.
 - Integración con `PlayerProfile.Loadouts` (estructura local o en servidor).
 - Validación en tiempo real del liderazgo total (`maxLeadership`).
 - Reflejo inmediato en el panel de unidades y coste total.
@@ -5542,7 +5543,7 @@ Construir el sistema que permite a los héroes desbloquear, equipar y beneficiar
 
 # Sistema de Supply Points con control territorial
 
-Descripción: Punto de reabastecimiento que permite curar, cambiar escuadra activa o arma y aplicar restricciones tácticas.
+Descripción: Punto de reabastecimiento que permite curar, cambiar la escuadra activa por otra *Troop* disponible o cambiar de arma, aplicando restricciones tácticas.
 Prioridad: Media
 Etiquetas: Combate, Gestión de Escuadra, Supply
 Etapa: Backlog
@@ -5591,7 +5592,7 @@ Este sistema permite rotaciones tácticas, zonas seguras móviles y gestión ava
 ### 2. **Permitir cambio de escuadra dentro de zona de Supply**
 
 - Mostrar interfaz de cambio cuando el jugador está en rango.
-- Listar escuadras disponibles y vivas (≥ 11% de efectivos).
+- Listar **tropas** disponibles y vivas (≥ 11% de efectivos).
 - Al seleccionar una:
     - Escuadra actual se desactiva con retardo de 5 segundos.
     - Nueva escuadra aparece dentro del rango del supply point.
@@ -5987,7 +5988,7 @@ Conectar el controlador de animaciones del héroe a un `Animator Controller` fun
 
 # Vincular escuadra al héroe jugador
 
-Descripción: Establecer la relación funcional entre el héroe del jugador y su escuadra seleccionada, asegurando que no pueda ser controlada por ningún otro héroe.
+Descripción: Establecer la relación funcional entre el héroe del jugador y la escuadra instanciada a partir de la *Troop* seleccionada, asegurando que no pueda ser controlada por ningún otro héroe.
 Prioridad: Alta
 Etiquetas: Gameplay, Gestión de Escuadra
 Etapa: Por hacer
@@ -6008,7 +6009,7 @@ Implementar el vínculo lógico entre un héroe jugador y una escuadra seleccion
 ### 🎮 **Funcionalidades requeridas:**
 
 - Al comenzar la partida o tras despliegue:
-    - Cada escuadra es instanciada y asignada al héroe correspondiente.
+    - Cada escuadra es instanciada desde su **Troop** y asignada al héroe correspondiente.
     - La escuadra pasa a un estado “controlada” y se vincula como propiedad exclusiva del héroe.
 - El héroe puede emitir órdenes (`Follow`, `Hold`, `Attack`) únicamente a su escuadra asignada.
 - La escuadra:
