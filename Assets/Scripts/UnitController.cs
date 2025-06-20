@@ -29,6 +29,20 @@ public class UnitController : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         ai = GetComponent<UnitAIController>();
         health = GetComponent<HealthComponent>();
+
+        if (health != null)
+        {
+            isAlive = health.IsAlive;
+            health.OnDeath += HandleDeath;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (health != null)
+        {
+            health.OnDeath -= HandleDeath;
+        }
     }
 
     private void Update()
@@ -59,12 +73,20 @@ public class UnitController : MonoBehaviour
         if (health != null)
         {
             health.ApplyDamage(amount);
-            if (!health.IsAlive && isAlive)
-            {
-                isAlive = false;
-                agent.isStopped = true;
-                OnDeath?.Invoke(this);
-            }
         }
+    }
+
+    private void HandleDeath()
+    {
+        if (!isAlive)
+            return;
+
+        isAlive = false;
+        if (agent != null)
+        {
+            agent.isStopped = true;
+        }
+
+        OnDeath?.Invoke(this);
     }
 }
