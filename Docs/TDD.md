@@ -1488,6 +1488,8 @@ public static class PlayerProfileManager {
     public static void SetActiveCharacter(CharacterData character) {
         CurrentProfile.activeCharacter = character;
     }
+
+    public static List<TroopData> GetAvailableSquads() => CurrentProfile.selectedLoadout;
 }
 ```
 
@@ -1498,6 +1500,8 @@ public class PlayerData {
     public string username;
     public List<CharacterData> characters;
     public CharacterData activeCharacter;
+    public List<TroopData> unlockedTroops;
+    public List<TroopData> selectedLoadout;
 }
 ```
 
@@ -2011,7 +2015,7 @@ Administrar el ciclo de vida, estado y comportamiento de las escuadras bajo cont
 ### 🧩 3. Componentes principales
 
 - `SquadManager.cs`: clase responsable de controlar una escuadra activa por jugador.
-- `SquadLoadout`: estructura de datos que representa la escuadra seleccionada.
+- `SquadLoadout`: `List<TroopData>` que almacena las plantillas disponibles.
 - `UnitController`: script de cada unidad miembro dentro de una escuadra.
 - `FormationController`: posicionamiento y lógica de organización táctica.
 - `SquadSpawner`: encargado de instanciar escuadras desde prefabs + loadout.
@@ -2021,32 +2025,35 @@ Administrar el ciclo de vida, estado y comportamiento de las escuadras bajo cont
 
 ### 🧱 4. Clases y estructuras
 
+### `SquadLoadout`
+
+```csharp
+[System.Serializable]
+public class SquadLoadout {
+    public List<TroopData> troops;
+    // isCombatViable se calcula vía SquadStatsTracker
+}
+```
+
 ### `SquadManager.cs`
 
 ```csharp
 public class SquadManager : MonoBehaviour {
-    public GameObject activeSquad;
-    public float deactivationDelay = 5f;
-    private bool isDeactivating = false;
+    public List<TroopData> loadout; // Plantillas en memoria
+    public SquadInstance activeInstance;
 
-    public void SpawnSquad(SquadLoadout loadout, Vector3 position) {
-        if (activeSquad != null) return;
-        activeSquad = Instantiate(loadout.prefab, position, Quaternion.identity);
-        SetupFormation(activeSquad, loadout);
-    }
+    public bool SwitchToSquad(TroopData troop) {
+        if (activeInstance != null && activeInstance.template == troop)
+            return false;
 
-    public void DeactivateCurrentSquad() {
-        if (activeSquad == null || isDeactivating) return;
-        isDeactivating = true;
-        StartCoroutine(RemoveSquadAfterDelay());
-    }
+        if (SquadStatsTracker.Instance.GetRemainingTroopPercentage(troop) <= 0.1f)
+            return false; // Demasiado diezmada
 
-    private IEnumerator RemoveSquadAfterDelay() {
-        DisableInput(activeSquad);
-        yield return new WaitForSeconds(deactivationDelay);
-        Destroy(activeSquad);
-        activeSquad = null;
-        isDeactivating = false;
+        if (activeInstance != null)
+            Destroy(activeInstance.gameObject);
+
+        activeInstance = SquadInstance.Spawn(troop);
+        return true;
     }
 }
 ```
@@ -2056,10 +2063,10 @@ public class SquadManager : MonoBehaviour {
 ### 🔄 5. Eventos y flujo de control
 
 1. **Al entrar a batalla o Supply Point**:
-    - Se crea la escuadra seleccionada con `SpawnSquad()`.
+    - Se instancia la escuadra activa con `SwitchToSquad(troop)`.
 2. **Cambio de escuadra**:
-    - `DeactivateCurrentSquad()` desactiva la anterior y la elimina tras delay.
-    - Nueva escuadra es instanciada automáticamente en zona de spawn o supply.
+    - `SwitchToSquad()` elimina la actual y crea la nueva si supera la validación.
+    - La nueva escuadra aparece en la zona de spawn o supply.
 3. **Durante el combate**:
     - El `FormationController` alinea las unidades automáticamente.
     - Las órdenes del jugador se interpretan y distribuyen (Follow, Attack, Hold).
@@ -2087,6 +2094,7 @@ public class SquadManager : MonoBehaviour {
 - Las unidades deben autoajustarse a formaciones incluso tras pérdidas (reorganización dinámica).
 - Cada jugador tiene **una y solo una escuadra activa**. Este sistema **lo garantiza.**
 - `SquadLoadout` se utiliza como entrada tanto desde UI de preparación como desde Supply.
+- Las tropas con ≤10% de supervivientes son marcadas como no reutilizables.
 
 ================================================================================
 # SupplyPointController 217df9df71028002a9e4d5fe56f54cb5
@@ -2141,6 +2149,12 @@ public class SupplyPointController : MonoBehaviour {
 
     public Collider triggerZone;
     public GameObject interactionObject; // carreta central
+    public SupplyPointInteractionUI interactionUI;
+
+    public void OpenInteraction(PlayerProfile profile) {
+        var squads = profile.GetAvailableSquads();
+        interactionUI.Show(squads, SquadManager.Instance);
+    }
 }
 ```
 
@@ -2154,7 +2168,7 @@ public class SupplyPointController : MonoBehaviour {
 - **Interacción:**
     - Si el jugador está en el bando correcto y presiona `F` sobre el objeto central (`interactionObject`), se abre la `SupplyPointInteractionUI`.
 - **Cambios posibles desde la UI:**
-    - Cambiar de escuadra (solo si ≥10% tropas vivas y no es la activa).
+    - Cambiar de escuadra. La lista muestra todas las del loadout y se deshabilitan las con ≤10% de unidades vivas o la actualmente activa.
     - Cambiar arma (entre armas desbloqueadas y compatibles).
     - Curación pasiva del héroe y la escuadra mientras permanezcan en el área.
 
@@ -2209,29 +2223,22 @@ Permitir al jugador, mientras se encuentra en el área de un `SupplyPoint` contr
 ### `SupplyPointInteractionUI.cs`
 
 ```csharp
-csharp
-CopiarEditar
 public class SupplyPointInteractionUI : MonoBehaviour {
     public SquadSelectorUI squadSelector;
-    public WeaponSelector weaponSelector;
     public Button confirmButton;
+    private SquadManager squadManager;
 
-    void Start() {
+    public void Show(List<TroopData> troops, SquadManager manager) {
+        squadManager = manager;
+        squadSelector.Populate(troops, troop =>
+            SquadStatsTracker.Instance.GetRemainingTroopPercentage(troop) > 0.1f);
         confirmButton.onClick.AddListener(ApplyChanges);
     }
 
-    public void Initialize(PlayerProfile profile, SquadManager squadManager) {
-        squadSelector.LoadFrom(profile);
-        weaponSelector.LoadAvailable(profile);
-    }
-
     void ApplyChanges() {
-        if (squadSelector.HasSelection()) {
-            squadManager.DeactivateCurrentSquad();
-            squadManager.SpawnSquad(squadSelector.GetSelected(), SupplyPointController.GetSpawnPosition());
-        }
-
-        weaponSelector.ApplyToHero();
+        var selected = squadSelector.GetSelectedTroop();
+        if (selected != null)
+            squadManager.SwitchToSquad(selected);
         gameObject.SetActive(false);
     }
 }
@@ -2244,11 +2251,12 @@ public class SupplyPointInteractionUI : MonoBehaviour {
 1. El jugador entra en el área del SupplyPoint (estado: `ControladoPorAliado`).
 2. Interactúa con el objeto central (`F`).
 3. Se muestra la UI:
-    - Lista de escuadras restantes con tropas (>10%) y no activa.
+    - Lista de todas las tropas del loadout indicando su porcentaje vivo.
+    - Las inviables (≤10% o la activa) se muestran deshabilitadas con tooltip.
     - Armas equipables disponibles.
 4. El jugador hace una o ambas selecciones.
 5. Al confirmar:
-    - Se reemplaza la escuadra actual (con delay).
+    - Se llama a `SwitchToSquad()` para cambiar la escuadra.
     - Se actualiza el arma equipada del héroe.
 6. La interfaz se cierra automáticamente.
 
@@ -2270,6 +2278,39 @@ public class SupplyPointInteractionUI : MonoBehaviour {
 - No se pueden tener dos escuadras activas.
 - El arma del héroe debe actualizarse en tiempo real (visual + lógica de combate).
 - El `ConfirmChangeButton` debe estar desactivado si ninguna opción válida ha sido seleccionada.
+- Mostrar tooltip "Demasiado diezmada para ser desplegada" en opciones deshabilitadas.
+
+================================================================================
+# SquadStatsTracker
+================================================================================
+
+# SquadStatsTracker
+
+### 📌 1. Nombre del Sistema
+
+**Seguimiento de estadísticas de escuadra (`SquadStatsTracker`)**
+
+---
+
+### 🎯 2. Propósito
+
+Registrar las bajas de cada `SquadInstance` y exponer porcentajes de tropas restantes para la lógica de UI y reemplazo.
+
+---
+
+### 🧱 3. Clases y estructuras
+
+### `SquadStatsTracker.cs`
+
+```csharp
+public class SquadStatsTracker : MonoBehaviour {
+    public int GetAliveCount(TroopData troop);
+    public int GetTotalCount(TroopData troop);
+    public float GetRemainingTroopPercentage(TroopData troop);
+}
+```
+
+Este método `GetRemainingTroopPercentage()` se utiliza para filtrar tropas viables.
 
 ================================================================================
 # UnitAIController (FSM básica de tropas) 217df9df7102808d9cbccfc24b6440a9
@@ -2507,3 +2548,11 @@ public class UnitController : MonoBehaviour {
     - Daño recibido (`HitReaction`)
     - Tipo de unidad / rol
 - Las unidades se identifican por `unitTeam` para evitar fuego amigo o confusión de IA.
+
+================================================================================
+# Estructuras Base de Escuadras
+================================================================================
+
+- **`TroopData` (ScriptableObject):** plantilla con atributos de una tropa.
+- **`SquadInstance` (en escena):** instancia activa de `TroopData` que gestiona a sus unidades.
+- **`SquadStatusTracker`** (alias de `SquadStatsTracker`): mantiene el porcentaje vivo y marca escuadras como no reutilizables.
