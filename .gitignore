@@ -28,3 +28,6 @@ Thumbs.db
 
 # Git
 .git/
+
+# Excluir carpetas 'examples'
+**/examples/

@@ -1,13 +1,13 @@
 {
   "dependencies": {
     "com.codemaestroai.advancedunitymcp": {
-      "version": "https://github.com/codemaestroai/advanced-unity-mcp.git",
+      "version": "https://github.com/codemaestroai/advanced-unity-mcp.git#ca61a9407763c1d2aea623dd1c67bb6b3f386d8e",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2"
       },
-      "hash": "f5a467a2c6a55cb8464d88b03ad11e3a31694ec7"
+      "hash": "ca61a9407763c1d2aea623dd1c67bb6b3f386d8e"
     },
     "com.unity.collab-proxy": {
       "version": "2.8.2",
@@ -71,7 +71,7 @@
     },
     "com.unity.nuget.newtonsoft-json": {
       "version": "3.2.1",
-      "depth": 1,
+      "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
@@ -133,7 +133,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ugui": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "depth": 0,
       "source": "builtin",
       "dependencies": {
