@@ -4,136 +4,130 @@
 
 # TDD — Conquest Tactics
 
-## 📘 TDD (Technical Design Document) – Proyecto Táctico Multijugador
-
-> Este documento define la arquitectura técnica, componentes, flujos de datos, y sistemas clave del juego descrito en el GDD. Está enfocado en la implementación real del gameplay, rendimiento, servidores, red y herramientas de desarrollo.
-> 
-
----
-
 ### 📐 1. Arquitectura General
 
-**Tipo de arquitectura:** Cliente-Servidor (con lógica autoritativa en servidor)
-
-**Motor :** Unity 3D 2022.3.62f1
-
-**Red:** Modelo Client-Predictive + Server Authority
-
-**Componentes principales:**
-
-- Cliente (rendering, input, UI, predicción de movimientos)
-- Servidor (simulación de combate, validación, control de estado mundial)
-- Base de datos (perfiles, loadouts, clanes)
-- Backend de matchmaking y persistencia (ELO, progresión, ranking)
+- **Arquitectura**: Cliente-Servidor autoritativo
+- **Motor**: Unity 3D `2022.3.62f1`
+- **Red**: Cliente Predictivo + Servidor Autoritativo (Mirror Networking)
+- **Componentes del sistema**:
+    - Cliente (render, input, UI, visualización)
+    - Servidor (validación, lógica de batalla, sincronización)
+    - Backend de matchmaking (matchmaker local)
+    - Persistencia en servidor local (SQLite/mock)
 
 ---
 
-### ⚔️ 2. Sistemas Críticos
+### ⚔️ 2. Sistemas Críticos (MVP)
 
-### 2.1 Combate y Control de Escuadras
+### 2.1 Combate y Escuadras
 
-| Sistema | Detalles técnicos |
+| Sistema | Detalles |
 | --- | --- |
-| **Input de escuadra** | Mapeo de hotkeys + UI radial para selección rápida |
-| **IA de tropa** | FSM o BT (Finite State Machine o Behaviour Tree) por unidad |
-| **Posicionamiento** | Formación basada en slots dinámicos (grid o spline-based) |
-| **Sincronización** | Estado cada 100ms + interpolación en cliente para suavizado |
+| `UnitController` | Control local por unidad, enlace con IA y formación |
+| `SquadManager` | Controla spawn, órdenes, disolución y composición de escuadra |
+| `CombatController` | Raycast o hitbox, cálculo de daño y aplicación de efectos |
+| `SquadCommandSystem` | Sistema de órdenes tácticas: seguir, atacar, mantener |
+| `FormationController` | Asigna posición por slot relativo; reorganiza al morir una unidad |
+
+### 2.2 IA de Tropas
+
+- **FSM básica**:
+    - `Idle`, `Follow`, `Engage`, `Attack`
+- **NavMesh Agent** por unidad + lógica FSM
+- **Reorganización** automática en formación
+
+### 2.3 Control del Jugador
+
+- Control directo del héroe en 3ra persona
+- Hotkeys para órdenes de escuadra
+- Interfaz radial para formaciones (mínimo funcional)
 
 ---
 
-### 2.2 Formaciones y Reacciones
+### 🧠 3. Sistema de Formaciones
 
-- Cada unidad tiene un **componente de formación**, que define:
-    - Posición relativa
-    - Tipo de animación por formación
-    - Bonus/malus en stats
-- **Formación Manager** (por escuadra):
-    - Trigger de cambio de formación con delay y verificación de colisión
-    - Manejo de interrupciones (si hay combate o desorden)
-- **Reacciones automáticas** se procesan por servidor con reglas como:
-    - Detección de flanqueo: basado en ángulo de ataque y posición relativa
-    - Carga detectada → trigger automático de cambio a Testudo o Círculo si está habilitado
+- **Formaciones fijas por tipo de unidad**
+- El jugador puede cambiar entre formaciones disponibles en su escuadra
+- Las posiciones se reasignan dinámicamente en tiempo real
+- No se permite personalización por el jugador
 
 ---
 
-### 2.3 Árbol de Talentos
+### 🌟 4. Talentos / Perks
 
-- Estructura de datos tipo **grafo dirigido acíclico (DAG)** para talentos.
-- Guardado en JSON por loadout.
-- Validación al aplicar talentos (dependencias, puntos disponibles).
-- Perks pasivos: aplicados como modificadores a `AttributeComponent`.
-- Perks activos: inyectan habilidades temporales en el `AbilitySystemComponent`.
+- Solo **perks pasivos** en MVP
+- Se aplican al cargar batalla
+- Almacenados por `loadout` del héroe
+- No editable en tiempo real (fuera de combate)
 
 ---
 
-### 2.4 Sistema de Clanes
+### 🧭 5. Flujo de Partida y Matchmaking
 
-| Elemento | Detalles |
+- `LoginManager` → `CharacterSelectionPanel` → `FeudoScene` → `Matchmaker` → `Preparación` → `Batalla`
+- `Matchmaker` local: agrupa jugadores 3v3 y asigna bandos
+- `SceneDataCarrier` transfiere el perfil del jugador y selección a la escena de preparación
+- `PreparationPanel` permite seleccionar tropas (manual o por loadout) y punto de spawn
+
+---
+
+### 🗺️ 6. Mapa de Batalla (Feudo)
+
+- 3 puntos de spawn por bando (atacante y defensor)
+- `SupplyPointController` con interacción contextual:
+    - Cambiar escuadra (de las sobrevivientes)
+    - Cambiar arma del héroe
+    - Curación en área si es aliado
+- `CapturePointController`: puntos de bandera con conquista unilateral
+- `BattleManager`: lógica de condiciones de victoria
+- `BattleTimer`: cuenta regresiva de 10 min
+
+---
+
+### 🎯 7. Condiciones de Victoria (MVP)
+
+- Si el **atacante** captura todas las banderas → victoria atacante
+- Si el **tiempo** se agota y hay banderas sin capturar → victoria defensor
+
+---
+
+### 🧾 8. UI y Pantallas Clave
+
+| Pantalla | Sistema asociado |
 | --- | --- |
-| Backend de clanes | Microservicio (Node.js o Python Flask) |
-| Base de datos | SQL o MongoDB con índice por ID y región |
-| Chat y gestión | WebSocket para comunicación en tiempo real |
-| Alianzas | Tabla relacional Clan A ↔ Clan B |
+| Login | `LoginManager` |
+| Selección de personaje | `CharacterSelectionPanel` |
+| Feudo | `SceneLoader`, `Matchmaker` |
+| Preparación de batalla | `PreparationPanel`, `LoadoutSystem` |
+| HUD combate | `SquadCommandSystem`, `FormationSelectorUI`, `TimerUI` |
+| UI de Supply Point | `SupplyPointInteractionUI` |
+| Resultados post-batalla | `BattleResultsUI`, `EndBattleHandler` |
 
 ---
 
-### 🧠 3. Inteligencia Artificial
+### 🧪 9. Persistencia (Mock para MVP)
 
-**Tropas AI:**
-
-- FSM con estados: `Idle`, `Forming`, `Engaging`, `Flanking`, `Fleeing`.
-- Componente táctico centralizado que dicta microcomportamientos.
-- Pathfinding basado en NavMesh dinámica con costos por terreno.
-
-**Héroes enemigos (PvE):**
-
-- BT con nodos adaptativos según moral, daño, aliados cercanos.
+- Perfiles de jugador: username, personajes, unidades desbloqueadas
+- Progreso local (nivel, loadouts, perks pasivos)
+- Guardado en estructura `PlayerProfileManager` (temporalmente local)
 
 ---
 
-### 🌍 4. Escenarios y Terreno
+### 🛠️ 10. Herramientas internas (mínimas para MVP)
 
-- Escenarios modulares con datos de:
-    - Tipos de terreno: afecta formaciones
-    - Obstáculos y estrechamientos → modifican IA
-- **Editor interno** para pintar áreas tácticas y zonas de moral
-
----
-
-### 🎮 5. Multiplayer y Red
-
-| Aspecto | Implementación |
-| --- | --- |
-| Sincronización | Server authoritative |
-| Predicción | Movimiento de héroe y input escuadra |
-| Tickrate | 30 Hz (unidad), 60 Hz (jugador) |
-| Latency Compensation | Registro de acciones en ventana de 200ms |
+- Editor de formaciones (`FormationData` como ScriptableObject)
+- Visualizador 3D de personaje (`HeroViewer3D`)
+- Gestor de perfiles y loadouts (`PlayerProfileManager`)
 
 ---
 
-### 💾 6. Persistencia
+### 🔧 11. Consideraciones Técnicas
 
-- Guardado de:
-    - Progreso (nivel, talentos, loadouts)
-    - Pertenencia a clan
-    - ELO y estadísticas
-- Guardado en servidor central (base SQL replicada)
+- Tickrate: 30Hz para tropas, 60Hz para héroes
+- Sincronización de estado cada 100ms
+- Soporte para testing offline (modo sin servidor dedicado)
+- Escalado futuro con backend y servidores dedicados (no incluido en MVP)
 
----
-
-### 🛠️ 7. Herramientas Internas
-
-- **Editor de formaciones** visual con ajuste de slots
-- **Simulador de perks** para pruebas de balance
-- **Dashboard de combate** (backend) para ver logs de daños, moral, eventos
-
----
-
-### 🔧 8. Consideraciones Técnicas Adicionales
-
-- Soporte multilenguaje (JSON con tokens por idioma)
-- Configuración de perks balanceable sin recompilar (DataTables o ScriptableObjects)
-- Escalado de servidor horizontal con Kubernetes
 
 # Sistemas
 
