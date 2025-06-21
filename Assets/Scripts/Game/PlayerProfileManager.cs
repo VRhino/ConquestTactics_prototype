@@ -34,6 +34,12 @@ public class PlayerProfileManager : MonoBehaviour
     public HeroData GetActiveHero() => currentProfile?.activeHero;
 
     /// <summary>
+    /// Returns all heroes created by the player.
+    /// </summary>
+    public List<HeroData> GetAllHeroes() =>
+        currentProfile != null ? currentProfile.heroes : new List<HeroData>();
+
+    /// <summary>
     /// Returns all squad loadouts unlocked by the player.
     /// </summary>
     public List<SquadLoadout> GetAllLoadouts() =>
@@ -63,6 +69,16 @@ public class PlayerProfileManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Adds a new hero to the profile.
+    /// </summary>
+    public void AddHero(HeroData newHero)
+    {
+        if (currentProfile == null || newHero == null)
+            return;
+        currentProfile.heroes.Add(newHero);
+    }
+
+    /// <summary>
     /// Loads a mock profile used for local testing when no backend is present.
     /// </summary>
     public void LoadMockProfile(string playerName)
@@ -72,7 +88,8 @@ public class PlayerProfileManager : MonoBehaviour
             playerId = Guid.NewGuid().ToString(),
             playerName = playerName,
             unlockedSquads = new List<SquadLoadout>(),
-            perksPasivos = new List<PerkData>()
+            perksPasivos = new List<PerkData>(),
+            heroes = new List<HeroData>()
         };
 
         // Attempt to load example assets for demonstration if available
@@ -81,7 +98,7 @@ public class PlayerProfileManager : MonoBehaviour
         if (currentProfile.unlockedSquads.Count > 0)
             currentProfile.activeSquad = currentProfile.unlockedSquads[0];
 
-        currentProfile.activeHero = new HeroData
+        var defaultHero = new HeroData
         {
             heroId = "hero_01",
             name = "Test Hero",
@@ -98,6 +115,9 @@ public class PlayerProfileManager : MonoBehaviour
             defenseBlunt = 0,
             movementSpeed = 5f
         };
+
+        currentProfile.heroes.Add(defaultHero);
+        currentProfile.activeHero = defaultHero;
     }
 
     /// <summary>
