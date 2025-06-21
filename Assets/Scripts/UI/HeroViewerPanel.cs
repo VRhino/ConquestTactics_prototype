@@ -16,7 +16,7 @@ public class HeroViewerPanel : MonoBehaviour
     /// <summary>
     /// Loads the hero model and stats from the given data.
     /// </summary>
-    public void LoadHero(CharacterData data)
+    public void LoadHero(HeroData data)
     {
         if (data == null)
             return;
@@ -40,6 +40,6 @@ public class HeroViewerPanel : MonoBehaviour
         }
 
         if (statsText != null)
-            statsText.text = $"HP: {data.health}\nATK: {data.attack}\nDEF: {data.defense}";
+            statsText.text = $"LVL: {data.level}\nFUE: {data.fuerza}\nDES: {data.destreza}\nARM: {data.armadura}\nVIT: {data.vitalidad}";
     }
 }

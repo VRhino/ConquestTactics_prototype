@@ -32,7 +32,7 @@ public class SupplyPointInteractionUI : MonoBehaviour
 
         if (selectSquadPanel != null)
         {
-            var squads = PlayerProfileManager.GetUnlockedSquads();
+            var squads = PlayerProfileManager.Instance.GetAllLoadouts();
             var disabled = new HashSet<SquadLoadout>(point.UsedLoadouts);
             selectSquadPanel.OnSquadSelected = OnSquadSelected;
             selectSquadPanel.Populate(squads, disabled);

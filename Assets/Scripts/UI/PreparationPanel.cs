@@ -45,11 +45,11 @@ public class PreparationPanel : MonoBehaviour
 
     private void LoadData()
     {
-        var squads = PlayerProfileManager.GetUnlockedSquads();
+        var squads = PlayerProfileManager.Instance.GetAllLoadouts();
         selectSquadPanel.Populate(squads);
         selectSquadPanel.OnSquadSelected += l => selectedLoadout = l;
 
-        var hero = PlayerProfileManager.GetActiveCharacter();
+        var hero = PlayerProfileManager.Instance.GetActiveHero();
         heroViewerPanel.LoadHero(hero);
         if (hero != null)
             perkPreviewPanel.Populate(hero.passivePerks);
