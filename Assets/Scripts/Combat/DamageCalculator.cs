@@ -10,14 +10,17 @@ public static class DamageCalculator
         float resistance = 0f;
         switch (attacker.damageType)
         {
-            case DamageType.Slashing:
+            case PhysicalDamageType.Slashing:
                 resistance = defender.slashingResistance;
                 break;
-            case DamageType.Piercing:
+            case PhysicalDamageType.Piercing:
                 resistance = defender.piercingResistance;
                 break;
-            case DamageType.Blunt:
+            case PhysicalDamageType.Blunt:
                 resistance = defender.bluntResistance;
+                break;
+            default:
+                resistance = 0f;
                 break;
         }
 

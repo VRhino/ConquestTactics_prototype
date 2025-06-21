@@ -104,11 +104,11 @@ public class UnitController : MonoBehaviour
     /// event will be triggered via <see cref="HandleDeath"/>.
     /// </summary>
     /// <param name="amount">Amount of damage to apply.</param>
-    public void ApplyDamage(int amount)
+    public void ApplyDamage(int amount, DamageVisualType type = DamageVisualType.Normal)
     {
         if (health != null)
         {
-            health.ApplyDamage(amount);
+            health.ApplyDamage(amount, type);
         }
     }
 

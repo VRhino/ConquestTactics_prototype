@@ -1,8 +1,5 @@
-public enum DamageType
+public enum DamageVisualType
 {
-    Slashing,
-    Piercing,
-    Blunt,
     /// <summary>Standard damage without modifiers.</summary>
     Normal,
     /// <summary>Critical hit dealing increased damage.</summary>
