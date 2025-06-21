@@ -112,7 +112,7 @@ public class BattleManager : MonoBehaviour
         // Optionally forward results to any UI component listening.
         var ui = FindObjectOfType<BattleResultsUI>();
         if (ui != null)
-            ui.Show(data);
+            ui.ShowResults(data);
     }
 
     /// <summary>
@@ -129,10 +129,11 @@ public class BattleManager : MonoBehaviour
         return new BattleResultData
         {
             result = result,
-            totalTime = time,
             squadName = name,
-            initialTroops = initial,
-            survivingTroops = survivors
+            unitsInitial = initial,
+            unitsRemaining = survivors,
+            battleDuration = time,
+            enemiesDefeated = 0
         };
     }
 
