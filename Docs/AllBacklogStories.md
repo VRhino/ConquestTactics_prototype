@@ -5375,7 +5375,7 @@ Desarrollar un sistema de combate en tiempo real que registre colisiones ofensiv
 
 - Componente `HealthComponent` en todas las entidades vivas.
 - Componente `DamageComponent` o `WeaponProfile` en armas/habilidades.
-- Tipos de daño definidos como enumeración (`enum DamageType`) o data asset.
+- Tipos de daño definidos como enumeración (`enum PhysicalDamageType`) o data asset.
 - Los héroes y tropas deben tener stats de defensa para cada tipo:
     
     ```
