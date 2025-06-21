@@ -1,27 +1,31 @@
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
 
 /// <summary>
 /// Allows the player to issue basic commands to the active squad.
 /// </summary>
 public class SquadCommandSystem : MonoBehaviour
 {
-    public enum CommandType
+    public enum SquadCommand
     {
-        FollowMe,
+        Follow,
         HoldPosition,
         AttackTarget
     }
 
-    [Tooltip("Reference to the squad manager handling the active squad")] 
+    [Tooltip("Reference to the squad manager handling the active squad")]
     public SquadManager squadManager;
+
+    [Tooltip("Optional text element to display issued commands")]
+    public TMP_Text feedbackText;
 
     /// <summary>
     /// Sends a command to every unit in the active squad.
     /// </summary>
     /// <param name="command">Type of command to issue.</param>
     /// <param name="target">Optional target transform used for AttackTarget.</param>
-    public void IssueCommand(CommandType command, Transform target = null)
+    public void IssueCommand(SquadCommand command, Transform target = null)
     {
         if (squadManager == null)
             squadManager = SquadManager.Instance;
@@ -44,17 +48,17 @@ public class SquadCommandSystem : MonoBehaviour
 
             switch (command)
             {
-                case CommandType.FollowMe:
+                case SquadCommand.Follow:
                     unit.SetFormationMode(true);
                     ai.SetFollowMode(true);
                     ai.ForceState(UnitAIController.AIState.MovingToFormation);
                     break;
-                case CommandType.HoldPosition:
+                case SquadCommand.HoldPosition:
                     unit.SetFormationMode(false);
                     ai.SetFollowMode(false);
                     ai.ForceState(UnitAIController.AIState.Idle);
                     break;
-                case CommandType.AttackTarget:
+                case SquadCommand.AttackTarget:
                     if (target != null)
                     {
                         ai.SetTarget(target);
@@ -62,5 +66,14 @@ public class SquadCommandSystem : MonoBehaviour
                     break;
             }
         }
+
+        ShowFeedback($"Issued command: {command}");
+    }
+
+    private void ShowFeedback(string message)
+    {
+        if (feedbackText != null)
+            feedbackText.text = message;
+        Debug.Log(message);
     }
 }

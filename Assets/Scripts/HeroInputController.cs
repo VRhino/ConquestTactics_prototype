@@ -92,13 +92,13 @@ public class HeroInputController : MonoBehaviour
             return;
 
         if (Input.GetKeyDown(KeyCode.Alpha1))
-            commandSystem.IssueCommand(SquadCommandSystem.CommandType.FollowMe);
+            commandSystem.IssueCommand(SquadCommandSystem.SquadCommand.Follow);
 
         if (Input.GetKeyDown(KeyCode.Alpha2))
-            commandSystem.IssueCommand(SquadCommandSystem.CommandType.HoldPosition);
+            commandSystem.IssueCommand(SquadCommandSystem.SquadCommand.HoldPosition);
 
         if (Input.GetKeyDown(KeyCode.Alpha3) && currentTarget != null)
-            commandSystem.IssueCommand(SquadCommandSystem.CommandType.AttackTarget, currentTarget);
+            commandSystem.IssueCommand(SquadCommandSystem.SquadCommand.AttackTarget, currentTarget);
 
         if (Input.GetKeyDown(KeyCode.Tab))
             onFormationMenu?.Invoke();
