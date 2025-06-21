@@ -66,6 +66,16 @@
     <Compile Include="Assets\Scripts\UnitAIController.cs" />
     <Compile Include="Assets\Scripts\HealthComponent.cs" />
     <Compile Include="Assets\Scripts\PlayerMovement.cs" />
+    <Compile Include="Assets\Scripts/Game/PlayerData.cs" />
+    <Compile Include="Assets\Scripts/Game/CharacterData.cs" />
+    <Compile Include="Assets\Scripts/Game/PerkData.cs" />
+    <Compile Include="Assets\Scripts/Game/PlayerProfileManager.cs" />
+    <Compile Include="Assets\Scripts/Game/GameManager.cs" />
+    <Compile Include="Assets\Scripts/UI/SelectSquadPanel.cs" />
+    <Compile Include="Assets\Scripts/UI/PerkEntryUI.cs" />
+    <Compile Include="Assets\Scripts/UI/PerkPreviewPanel.cs" />
+    <Compile Include="Assets\Scripts/UI/HeroViewerPanel.cs" />
+    <Compile Include="Assets\Scripts/UI/PreparationPanel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />
