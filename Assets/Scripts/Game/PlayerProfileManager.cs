@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -64,12 +65,12 @@ public class PlayerProfileManager : MonoBehaviour
     /// <summary>
     /// Loads a mock profile used for local testing when no backend is present.
     /// </summary>
-    public void LoadMockProfile()
+    public void LoadMockProfile(string playerName)
     {
         currentProfile = new PlayerProfileData
         {
-            playerId = "local",
-            playerName = "Tester",
+            playerId = Guid.NewGuid().ToString(),
+            playerName = playerName,
             unlockedSquads = new List<SquadLoadout>(),
             perksPasivos = new List<PerkData>()
         };
@@ -97,6 +98,14 @@ public class PlayerProfileManager : MonoBehaviour
             defenseBlunt = 0,
             movementSpeed = 5f
         };
+    }
+
+    /// <summary>
+    /// Overload that uses a default tester name.
+    /// </summary>
+    public void LoadMockProfile()
+    {
+        LoadMockProfile("Tester");
     }
 
     /// <summary>
