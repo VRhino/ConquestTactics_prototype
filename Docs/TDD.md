@@ -615,16 +615,16 @@ Gestionar la detección de ataques físicos (cuerpo a cuerpo o a distancia), ver
 - `HitboxComponent` / `RaycastDetector`: define zonas de colisión.
 - `DamageCalculator.cs`: módulo estático que realiza el cálculo matemático.
 - `HealthComponent.cs`: recibe y aplica el daño final.
-- `DamageType`, `ArmorType`, `PenetrationStats`: definiciones y factores.
+- `PhysicalDamageType`, `ArmorType`, `PenetrationStats`: definiciones y factores.
 
 ---
 
 ### 🧱 4. Clases y estructuras
 
-### `DamageType` (enum)
+### `PhysicalDamageType` (enum)
 
 ```csharp
-public enum DamageType {
+public enum PhysicalDamageType {
     Slashing,
     Piercing,
     Blunt
@@ -639,7 +639,7 @@ csharp
 CopiarEditar
 public class CombatStats {
     public float baseDamage;
-    public DamageType damageType;
+    public PhysicalDamageType damageType;
     public float armorPenetration; // porcentaje
 }
 
@@ -666,11 +666,11 @@ public static class DamageCalculator {
         return Mathf.Max(1, Mathf.RoundToInt(finalDamage)); // Nunca 0
     }
 
-    private static float GetRelevantArmor(DefenseStats def, DamageType type) {
+    private static float GetRelevantArmor(DefenseStats def, PhysicalDamageType type) {
         return type switch {
-            DamageType.Slashing => def.armorSlashing,
-            DamageType.Piercing => def.armorPiercing,
-            DamageType.Blunt => def.armorBlunt,
+            PhysicalDamageType.Slashing => def.armorSlashing,
+            PhysicalDamageType.Piercing => def.armorPiercing,
+            PhysicalDamageType.Blunt => def.armorBlunt,
             _ => 0f
         };
     }
