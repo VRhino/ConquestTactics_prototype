@@ -16,7 +16,7 @@ public class FormationController : MonoBehaviour
     public Transform leaderTransform;
 
     // Active members of the squad
-    private readonly List<UnitController> units = new List<UnitController>();
+    private readonly List<UnitController> units = new();
 
     private void Update()
     {
@@ -32,6 +32,7 @@ public class FormationController : MonoBehaviour
             return;
 
         units.Add(unit);
+        unit.OnDeath += OnUnitDeath;
         ReassignPositions();
     }
 
@@ -45,6 +46,7 @@ public class FormationController : MonoBehaviour
 
         if (units.Remove(unit))
         {
+            unit.OnDeath -= OnUnitDeath;
             ReassignPositions();
         }
     }
@@ -97,8 +99,16 @@ public class FormationController : MonoBehaviour
     /// <summary>
     /// Reassigns slots when the formation changes or units are added/removed.
     /// </summary>
-    private void ReassignPositions()
+    public void ReassignPositions()
     {
         UpdateFormationPositions();
+    }
+
+    /// <summary>
+    /// Callback when a unit dies to keep formation cohesion.
+    /// </summary>
+    public void OnUnitDeath(UnitController unit)
+    {
+        UnregisterUnit(unit);
     }
 }
