@@ -46,14 +46,19 @@ public class SquadCommandSystem : MonoBehaviour
             {
                 case CommandType.FollowMe:
                     unit.SetFormationMode(true);
+                    ai.SetFollowMode(true);
+                    ai.ForceState(UnitAIController.AIState.MovingToFormation);
                     break;
                 case CommandType.HoldPosition:
                     unit.SetFormationMode(false);
-                    ai.SetToHoldPosition();
+                    ai.SetFollowMode(false);
+                    ai.ForceState(UnitAIController.AIState.Idle);
                     break;
                 case CommandType.AttackTarget:
                     if (target != null)
+                    {
                         ai.SetTarget(target);
+                    }
                     break;
             }
         }

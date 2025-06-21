@@ -2340,6 +2340,7 @@ Controlar el comportamiento autónomo de cada unidad dentro de una escuadra, per
 - `UnitSensor`: detecta enemigos cercanos.
 - `FormationController`: define los `slots` de posicionamiento.
 - `SquadCommander` (futuro): sistema para aplicar órdenes tácticas.
+- `FSMDebugger` (opcional): muestra sobre la unidad el estado actual de la FSM.
 
 ---
 
