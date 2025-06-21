@@ -16,13 +16,26 @@ public class SupplyPointController : MonoBehaviour
     public float cooldown = 5f;
 
     private bool onCooldown;
+    private bool playerInside;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (onCooldown)
-            return;
+        if (other.CompareTag("Player"))
+            playerInside = true;
+    }
 
-        if (!other.CompareTag("Player"))
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+            playerInside = false;
+    }
+
+    /// <summary>
+    /// Called by the player controller when interacting with the point.
+    /// </summary>
+    public void Interact()
+    {
+        if (onCooldown || !playerInside)
             return;
 
         if (interactionUI != null)
