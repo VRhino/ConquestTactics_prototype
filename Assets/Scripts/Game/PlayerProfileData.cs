@@ -10,6 +10,7 @@ public class PlayerProfileData
 {
     public string playerId;
     public string playerName;
+    public List<HeroData> heroes = new();
     public List<SquadLoadout> unlockedSquads = new();
     public SquadLoadout activeSquad;
     public HeroData activeHero;
