@@ -6,6 +6,7 @@ using UnityEngine.AI;
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(HealthComponent))]
+[RequireComponent(typeof(DefenseStats))]
 [RequireComponent(typeof(UnitAIController))]
 public class UnitController : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class UnitController : MonoBehaviour
     public NavMeshAgent agent { get; private set; }
     public UnitAIController ai { get; private set; }
     public HealthComponent health { get; private set; }
+    public DefenseStats defense { get; private set; }
 
     private UnitState currentState = UnitState.Inactive;
     private bool formationMode = false;
@@ -29,6 +31,7 @@ public class UnitController : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         ai = GetComponent<UnitAIController>();
         health = GetComponent<HealthComponent>();
+        defense = GetComponent<DefenseStats>();
 
         if (health != null)
         {
