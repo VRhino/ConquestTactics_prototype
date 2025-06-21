@@ -74,5 +74,38 @@ public class SquadManager : MonoBehaviour
     {
         return activeSquad != null ? activeSquad.GetUnits() : new List<UnitController>();
     }
+
+    /// <summary>
+    /// Returns true when there are no units alive in the current squad.
+    /// </summary>
+    public bool HasNoUnits()
+    {
+        return GetActiveUnits().Count == 0;
+    }
+
+    /// <summary>
+    /// Total number of units defined in the active loadout.
+    /// </summary>
+    public int GetInitialUnitCount()
+    {
+        if (activeSquad == null || activeSquad.Loadout == null)
+            return 0;
+
+        int count = 0;
+        foreach (var troop in activeSquad.Loadout.troops)
+        {
+            if (troop != null)
+                count += troop.unitCount;
+        }
+        return count;
+    }
+
+    /// <summary>
+    /// Current count of alive units in the active squad.
+    /// </summary>
+    public int GetCurrentUnitCount()
+    {
+        return GetActiveUnits().Count;
+    }
 }
 
