@@ -13,13 +13,15 @@ public class SelectSquadPanel : MonoBehaviour
     private readonly List<Button> created = new();
     private List<SquadLoadout> loadouts;
 
-    public System.Action<SquadLoadout> OnLoadoutSelected;
+    public System.Action<SquadLoadout> OnSquadSelected;
     public SquadLoadout SelectedLoadout { get; private set; }
 
     /// <summary>
     /// Populates the UI with all available loadouts.
     /// </summary>
-    public void Populate(List<SquadLoadout> available)
+    /// <param name="available">List of possible squad loadouts.</param>
+    /// <param name="alreadyUsed">Optional set with loadouts that can't be selected.</param>
+    public void Populate(List<SquadLoadout> available, HashSet<SquadLoadout> alreadyUsed = null)
     {
         Clear();
         loadouts = available;
@@ -27,30 +29,40 @@ public class SelectSquadPanel : MonoBehaviour
         {
             Button btn = Instantiate(entryPrefab, listContainer);
             created.Add(btn);
-            btn.GetComponentInChildren<Text>().text = loadout.name;
+            var txt = btn.GetComponentInChildren<Text>();
+            if (txt != null)
+                txt.text = loadout.name;
 
-            btn.interactable = IsLoadoutViable(loadout);
+            bool used = alreadyUsed != null && alreadyUsed.Contains(loadout);
+            btn.interactable = !used;
+
+            if (!used && HasLowTroops(loadout))
+            {
+                if (txt != null)
+                    txt.color = Color.yellow;
+            }
+
             var l = loadout;
             btn.onClick.AddListener(() => Select(l));
         }
     }
 
-    private bool IsLoadoutViable(SquadLoadout loadout)
+    private bool HasLowTroops(SquadLoadout loadout)
     {
         if (loadout == null)
             return false;
         foreach (var troop in loadout.troops)
         {
             if (SquadStatsTracker.Instance.GetRemainingTroopPercentage(troop) <= 0.1f)
-                return false;
+                return true;
         }
-        return true;
+        return false;
     }
 
     private void Select(SquadLoadout loadout)
     {
         SelectedLoadout = loadout;
-        OnLoadoutSelected?.Invoke(loadout);
+        OnSquadSelected?.Invoke(loadout);
     }
 
     private void Clear()

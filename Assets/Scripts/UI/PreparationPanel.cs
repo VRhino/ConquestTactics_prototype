@@ -47,7 +47,7 @@ public class PreparationPanel : MonoBehaviour
     {
         var squads = PlayerProfileManager.GetUnlockedSquads();
         selectSquadPanel.Populate(squads);
-        selectSquadPanel.OnLoadoutSelected += l => selectedLoadout = l;
+        selectSquadPanel.OnSquadSelected += l => selectedLoadout = l;
 
         var hero = PlayerProfileManager.GetActiveCharacter();
         heroViewerPanel.LoadHero(hero);
