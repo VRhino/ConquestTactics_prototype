@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 /// <summary>
 /// Example supply point that allows replacing the active squad.
@@ -15,6 +16,12 @@ public class SupplyPointController : MonoBehaviour
     [Tooltip("Cooldown time between interactions")]
     public float cooldown = 5f;
 
+    // Tracks whether the point has been consumed.
+    private bool used;
+    // Tracks loadouts already chosen in this battle.
+    private readonly HashSet<SquadLoadout> usedLoadouts = new();
+    public IReadOnlyCollection<SquadLoadout> UsedLoadouts => usedLoadouts;
+
     private bool onCooldown;
     private bool playerInside;
 
@@ -27,7 +34,11 @@ public class SupplyPointController : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
+        {
             playerInside = false;
+            if (interactionUI != null)
+                interactionUI.Hide();
+        }
     }
 
     /// <summary>
@@ -35,7 +46,7 @@ public class SupplyPointController : MonoBehaviour
     /// </summary>
     public void Interact()
     {
-        if (onCooldown || !playerInside)
+        if (onCooldown || !playerInside || used)
             return;
 
         if (interactionUI != null)
@@ -63,6 +74,13 @@ public class SupplyPointController : MonoBehaviour
 
         yield return new WaitForSeconds(cooldown);
         onCooldown = false;
+    }
+
+    public void MarkUsed(SquadLoadout loadout)
+    {
+        if (loadout != null)
+            usedLoadouts.Add(loadout);
+        used = true;
     }
 }
 
