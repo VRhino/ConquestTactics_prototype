@@ -1,43 +1,59 @@
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
-/// Finite State Machine based controller for individual units.
+/// Finite State Machine controller for tactical units.
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(CombatController))]
+[RequireComponent(typeof(UnitController))]
 public class UnitAIController : MonoBehaviour
 {
-    public enum AIState { Idle, FollowLeader, EngageEnemy, Attack }
+    public enum AIState { Idle, MovingToFormation, FollowingLeader, EngagingEnemy, Attacking }
 
     [Header("AI Settings")]
-    public float followDistance = 5f;
-    public float detectionRadius = 8f;
     public float attackRange = 2f;
-    public LayerMask enemyLayers = ~0;
+    public float formationReachThreshold = 1f;
+
+    public EnemyDetectionSensor enemySensor;
+    public Transform leader;
 
     private NavMeshAgent agent;
     private UnitController unit;
     private CombatController combat;
-    private FormationController formation;
-
-    public Transform leader;
     private AIState currentState = AIState.Idle;
     private Transform currentEnemy;
-    private bool holdPosition;
-    private Vector3 holdPoint;
+    private bool followMode = true;
+
+    public event Action<AIState> OnStateChanged;
+
+    public AIState CurrentState => currentState;
 
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         unit = GetComponent<UnitController>();
         combat = GetComponent<CombatController>();
-        formation = GetComponentInParent<FormationController>();
+        if (enemySensor == null)
+            enemySensor = GetComponent<EnemyDetectionSensor>();
+        if (enemySensor == null)
+            enemySensor = gameObject.AddComponent<EnemyDetectionSensor>();
+
+        var formation = GetComponentInParent<FormationController>();
         if (leader == null && formation != null)
             leader = formation.leaderTransform;
     }
 
     private void Update()
+    {
+        UpdateFSM();
+    }
+
+    /// <summary>
+    /// Updates transitions and executes the current state logic.
+    /// </summary>
+    public void UpdateFSM()
     {
         EvaluateTransitions();
         ExecuteState();
@@ -45,42 +61,76 @@ public class UnitAIController : MonoBehaviour
 
     private void EvaluateTransitions()
     {
-        if (holdPosition)
+        // Acquire enemies each frame
+        if (enemySensor != null)
         {
-            currentState = AIState.Idle;
-            return;
+            Transform detected = enemySensor.FindNearestEnemy();
+            if (detected != null)
+                currentEnemy = detected;
+            else if (currentEnemy != null &&
+                     Vector3.Distance(transform.position, currentEnemy.position) > enemySensor.detectionRadius)
+                currentEnemy = null;
         }
-
-        DetectEnemies();
 
         switch (currentState)
         {
             case AIState.Idle:
                 if (currentEnemy != null)
-                    currentState = AIState.EngageEnemy;
-                else if (leader != null && Vector3.Distance(transform.position, leader.position) > followDistance)
-                    currentState = AIState.FollowLeader;
+                {
+                    ChangeState(AIState.EngagingEnemy); // Enemy spotted
+                }
+                else if (followMode && leader != null)
+                {
+                    ChangeState(AIState.MovingToFormation); // Rejoin formation
+                }
                 break;
 
-            case AIState.FollowLeader:
+            case AIState.MovingToFormation:
                 if (currentEnemy != null)
-                    currentState = AIState.EngageEnemy;
-                else if (leader != null && Vector3.Distance(transform.position, leader.position) <= followDistance)
-                    currentState = AIState.Idle;
+                {
+                    ChangeState(AIState.EngagingEnemy); // Interrupt formation move
+                }
+                else if (!followMode)
+                {
+                    ChangeState(AIState.Idle); // Follow cancelled
+                }
+                else if (Vector3.Distance(transform.position, unit.assignedFormationPosition) <= formationReachThreshold)
+                {
+                    ChangeState(AIState.FollowingLeader); // Slot reached
+                }
                 break;
 
-            case AIState.EngageEnemy:
+            case AIState.FollowingLeader:
+                if (currentEnemy != null)
+                {
+                    ChangeState(AIState.EngagingEnemy); // Enemy near
+                }
+                else if (!followMode)
+                {
+                    ChangeState(AIState.Idle); // Stop following
+                }
+                break;
+
+            case AIState.EngagingEnemy:
                 if (currentEnemy == null)
-                    currentState = leader != null ? AIState.FollowLeader : AIState.Idle;
+                {
+                    ChangeState(followMode ? AIState.MovingToFormation : AIState.Idle); // Lost target
+                }
                 else if (Vector3.Distance(transform.position, currentEnemy.position) <= attackRange)
-                    currentState = AIState.Attack;
+                {
+                    ChangeState(AIState.Attacking); // In range to attack
+                }
                 break;
 
-            case AIState.Attack:
+            case AIState.Attacking:
                 if (currentEnemy == null)
-                    currentState = leader != null ? AIState.FollowLeader : AIState.Idle;
+                {
+                    ChangeState(followMode ? AIState.MovingToFormation : AIState.Idle); // Target gone
+                }
                 else if (Vector3.Distance(transform.position, currentEnemy.position) > attackRange)
-                    currentState = AIState.EngageEnemy;
+                {
+                    ChangeState(AIState.EngagingEnemy); // Target moved away
+                }
                 break;
         }
     }
@@ -91,76 +141,59 @@ public class UnitAIController : MonoBehaviour
         {
             case AIState.Idle:
                 agent.isStopped = true;
-                if (holdPosition)
-                    agent.SetDestination(holdPoint);
                 break;
-            case AIState.FollowLeader:
+            case AIState.MovingToFormation:
+            case AIState.FollowingLeader:
                 agent.isStopped = false;
-                if (leader != null)
-                    agent.SetDestination(leader.position);
+                agent.SetDestination(unit.assignedFormationPosition);
                 break;
-            case AIState.EngageEnemy:
+            case AIState.EngagingEnemy:
                 agent.isStopped = false;
                 if (currentEnemy != null)
                     agent.SetDestination(currentEnemy.position);
                 break;
-            case AIState.Attack:
+            case AIState.Attacking:
                 agent.isStopped = true;
-                if (currentEnemy != null && combat != null)
+                if (currentEnemy != null &&
+                    Vector3.Distance(transform.position, currentEnemy.position) <= attackRange)
+                {
                     combat.TryAttack(currentEnemy.gameObject);
+                }
                 break;
         }
     }
 
-    private void DetectEnemies()
+    /// <summary>
+    /// Allows external systems to force the current state.
+    /// </summary>
+    public void ForceState(AIState newState)
     {
-        if (currentEnemy != null)
-        {
-            HealthComponent hp = currentEnemy.GetComponent<HealthComponent>();
-            if (hp == null || !hp.IsAlive || Vector3.Distance(transform.position, currentEnemy.position) > detectionRadius)
-                currentEnemy = null;
-        }
-
-        if (currentEnemy == null)
-        {
-            Collider[] cols = Physics.OverlapSphere(transform.position, detectionRadius, enemyLayers);
-            foreach (var c in cols)
-            {
-                if (c.transform == transform) continue;
-                var hp = c.GetComponent<HealthComponent>();
-                if (hp != null && hp.IsAlive)
-                {
-                    currentEnemy = c.transform;
-                    break;
-                }
-            }
-        }
+        ChangeState(newState);
     }
 
     /// <summary>
-    /// Allows external systems to force a state change.
+    /// Enables or disables formation following.
     /// </summary>
-    public void SetState(AIState newState) => currentState = newState;
-
-    /// <summary>
-    /// Orders the unit to hold its current position.
-    /// </summary>
-    public void SetToHoldPosition()
+    public void SetFollowMode(bool value)
     {
-        holdPosition = true;
-        holdPoint = transform.position;
-        currentEnemy = null;
-        currentState = AIState.Idle;
+        followMode = value;
+    }
+
+    private void ChangeState(AIState newState)
+    {
+        if (currentState == newState)
+            return;
+        currentState = newState;
+        OnStateChanged?.Invoke(currentState);
     }
 
     /// <summary>
-    /// Sets an enemy target for the unit.
+    /// Sets a specific enemy as target and moves to engage it.
     /// </summary>
     public void SetTarget(Transform target)
     {
         if (target == null) return;
-        holdPosition = false;
         currentEnemy = target;
-        currentState = AIState.EngageEnemy;
+        ChangeState(AIState.EngagingEnemy);
     }
 }
