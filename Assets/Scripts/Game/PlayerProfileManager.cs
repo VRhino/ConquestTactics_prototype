@@ -1,21 +1,130 @@
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// Manages the current player's profile in memory.
-/// Provides quick access to character and squad data.
+/// Singleton manager holding the local player's profile and active hero data.
+/// Provides an interface for other systems to query the current squad and hero.
+/// Future versions will serialize this information using JSON.
 /// </summary>
-public static class PlayerProfileManager
+public class PlayerProfileManager : MonoBehaviour
 {
-    public static PlayerData CurrentProfile { get; private set; }
+    public static PlayerProfileManager Instance { get; private set; }
 
-    public static void Initialize(PlayerData data)
+    [Tooltip("Current player profile loaded in memory")]
+    [SerializeField]
+    private PlayerProfileData currentProfile;
+
+    private void Awake()
     {
-        CurrentProfile = data;
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+        LoadMockProfile();
     }
 
-    public static CharacterData GetActiveCharacter() => CurrentProfile?.activeCharacter;
+    /// <summary>
+    /// Returns the hero currently selected by the player.
+    /// </summary>
+    public HeroData GetActiveHero() => currentProfile?.activeHero;
 
-    public static List<SquadLoadout> GetUnlockedSquads() =>
-        CurrentProfile != null ? CurrentProfile.unlockedSquads : new List<SquadLoadout>();
+    /// <summary>
+    /// Returns all squad loadouts unlocked by the player.
+    /// </summary>
+    public List<SquadLoadout> GetAllLoadouts() =>
+        currentProfile != null ? currentProfile.unlockedSquads : new List<SquadLoadout>();
+
+    /// <summary>
+    /// Returns the squad currently marked as active in the profile.
+    /// </summary>
+    public SquadLoadout GetActiveSquad() => currentProfile?.activeSquad;
+
+    /// <summary>
+    /// Sets the active squad in memory.
+    /// </summary>
+    public void SetActiveSquad(SquadLoadout newSquad)
+    {
+        if (currentProfile != null)
+            currentProfile.activeSquad = newSquad;
+    }
+
+    /// <summary>
+    /// Sets the active hero in memory.
+    /// </summary>
+    public void SetActiveHero(HeroData newHero)
+    {
+        if (currentProfile != null)
+            currentProfile.activeHero = newHero;
+    }
+
+    /// <summary>
+    /// Loads a mock profile used for local testing when no backend is present.
+    /// </summary>
+    public void LoadMockProfile()
+    {
+        currentProfile = new PlayerProfileData
+        {
+            playerId = "local",
+            playerName = "Tester",
+            unlockedSquads = new List<SquadLoadout>(),
+            perksPasivos = new List<PerkData>()
+        };
+
+        // Attempt to load example assets for demonstration if available
+        var defaultSquads = Resources.LoadAll<SquadLoadout>(string.Empty);
+        currentProfile.unlockedSquads.AddRange(defaultSquads);
+        if (currentProfile.unlockedSquads.Count > 0)
+            currentProfile.activeSquad = currentProfile.unlockedSquads[0];
+
+        currentProfile.activeHero = new HeroData
+        {
+            heroId = "hero_01",
+            name = "Test Hero",
+            level = 1,
+            fuerza = 5,
+            destreza = 5,
+            armadura = 2,
+            vitalidad = 20,
+            damageSlashing = 3,
+            damagePiercing = 2,
+            damageBlunt = 1,
+            defenseSlashing = 0,
+            defensePiercing = 0,
+            defenseBlunt = 0,
+            movementSpeed = 5f
+        };
+    }
+
+    /// <summary>
+    /// Serializes the current profile to disk for future persistence.
+    /// </summary>
+    public void SaveProfile()
+    {
+        if (currentProfile == null) return;
+        string path = Path.Combine(Application.persistentDataPath, "player_profile.json");
+        string json = JsonUtility.ToJson(currentProfile, true);
+        File.WriteAllText(path, json);
+    }
+
+    /// <summary>
+    /// Attempts to load a profile from disk.
+    /// </summary>
+    public void LoadProfile()
+    {
+        string path = Path.Combine(Application.persistentDataPath, "player_profile.json");
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            currentProfile = JsonUtility.FromJson<PlayerProfileData>(json);
+        }
+        else
+        {
+            Debug.LogWarning("No saved profile found, using mock profile.");
+            LoadMockProfile();
+        }
+    }
 }
