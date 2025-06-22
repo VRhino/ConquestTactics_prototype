@@ -13,6 +13,7 @@ public class InBattleHUD : MonoBehaviour
     public TextMeshProUGUI squadNameText;
     public TextMeshProUGUI troopCountText;
     public TextMeshProUGUI formationText;
+    public TextMeshProUGUI timerText;
     public Button followButton;
     public Button holdButton;
     public Button attackButton;
@@ -21,6 +22,7 @@ public class InBattleHUD : MonoBehaviour
     [Header("Visual Feedback")]
     public Color activeColor = Color.green;
     public Color inactiveColor = Color.white;
+    public Color timeWarningColor = Color.red;
 
     public event System.Action OnChangeFormationRequest;
 
@@ -45,6 +47,13 @@ public class InBattleHUD : MonoBehaviour
     private void OnEnable()
     {
         BattleManager.Instance.OnBattleEnd += HandleBattleEnd;
+        if (BattleTimer.Instance != null)
+        {
+            BattleTimer.Instance.OnTimerTick += UpdateTimerText;
+            BattleTimer.Instance.OnTimeWarning += DisplayTimeWarning;
+            if (timerText != null)
+                timerText.text = BattleTimer.GetFormattedElapsedTime();
+        }
         updateTimer = 1f;
         UpdateHUD();
     }
@@ -53,6 +62,11 @@ public class InBattleHUD : MonoBehaviour
     {
         if (BattleManager.Instance != null)
             BattleManager.Instance.OnBattleEnd -= HandleBattleEnd;
+        if (BattleTimer.Instance != null)
+        {
+            BattleTimer.Instance.OnTimerTick -= UpdateTimerText;
+            BattleTimer.Instance.OnTimeWarning -= DisplayTimeWarning;
+        }
     }
 
     private void Update()
@@ -166,6 +180,18 @@ public class InBattleHUD : MonoBehaviour
     private void RequestFormationChange()
     {
         OnChangeFormationRequest?.Invoke();
+    }
+
+    private void UpdateTimerText(float time)
+    {
+        if (timerText != null)
+            timerText.text = BattleTimer.GetFormattedElapsedTime();
+    }
+
+    private void DisplayTimeWarning(float remaining)
+    {
+        if (timerText != null)
+            timerText.color = timeWarningColor;
     }
 
     private void HandleBattleEnd(BattleManager.BattleState state)
