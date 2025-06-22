@@ -1,61 +1,101 @@
-using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
-/// Example supply point that allows replacing the active squad.
+/// Handles player interaction with a tactical map supply point. When the player
+/// enters the trigger zone and presses the configured key, a UI is shown to
+/// allow swapping the current squad. Each point can be used only once per
+/// battle.
 /// </summary>
 public class SupplyPointController : MonoBehaviour
 {
-    [Tooltip("Delay before the previous squad is fully destroyed")]
-    public float despawnDelay = 1f;
-
-    [Tooltip("UI shown when the player interacts with the supply point")]
+    [Header("References")]
+    [Tooltip("UI displayed when interacting with the supply point")]
     public SupplyPointInteractionUI interactionUI;
 
-    [Tooltip("Cooldown time between interactions")]
-    public float cooldown = 5f;
+    [Tooltip("Optional hint object shown when the player can interact")]
+    public GameObject interactHint;
 
-    // Tracks whether the point has been consumed.
-    private bool used;
-    // Tracks loadouts already chosen in this battle.
-    private readonly HashSet<SquadLoadout> usedLoadouts = new();
-    public IReadOnlyCollection<SquadLoadout> UsedLoadouts => usedLoadouts;
+    [Tooltip("Renderer used to change colour once consumed")]
+    public Renderer pointRenderer;
+    public Color usedColor = Color.gray;
 
-    private bool onCooldown;
-    private bool playerInside;
+    [Tooltip("Spawn location for the new squad. Defaults to this transform")] 
+    public Transform spawnPosition;
 
-    private void OnTriggerEnter(Collider other)
+    [Header("Settings")]
+    public float despawnDelay = 1f;
+    public KeyCode interactionKey = KeyCode.E;
+
+    [HideInInspector] public bool isUsed = false;
+    [HideInInspector] public bool canInteract = false;
+
+    private Color originalColor;
+
+    private void Awake()
     {
-        if (other.CompareTag("Player"))
-            playerInside = true;
+        if (pointRenderer != null)
+            originalColor = pointRenderer.material.color;
+        UpdateVisualState();
     }
 
+    private void Update()
+    {
+        if (canInteract && !isUsed && Input.GetKeyDown(interactionKey))
+        {
+            ActivateSupplyPoint();
+        }
+    }
+
+    /// <summary>
+    /// Triggered when something enters the interaction area.
+    /// </summary>
+    private void OnTriggerEnter(Collider other)
+    {
+        if (isUsed)
+            return;
+
+        if (other.CompareTag("Player") || other.GetComponent<HeroInputController>() != null)
+        {
+            canInteract = true;
+            if (interactHint != null)
+                interactHint.SetActive(true);
+        }
+    }
+
+    /// <summary>
+    /// Triggered when something leaves the interaction area.
+    /// </summary>
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") || other.GetComponent<HeroInputController>() != null)
         {
-            playerInside = false;
+            canInteract = false;
+            if (interactHint != null)
+                interactHint.SetActive(false);
             if (interactionUI != null)
                 interactionUI.Hide();
         }
     }
 
     /// <summary>
-    /// Called by the player controller when interacting with the point.
+    /// Opens the squad selection UI if the point has not been used yet.
     /// </summary>
-    public void Interact()
+    public void ActivateSupplyPoint()
     {
-        if (onCooldown || !playerInside || used)
+        if (isUsed || interactionUI == null)
             return;
 
-        if (interactionUI != null)
-            interactionUI.ShowOptions(this);
+        Debug.Log("SupplyPoint activado");
+        interactionUI.ShowOptions(this);
     }
 
-    public void ChangeSquad(SquadLoadout loadout)
+    /// <summary>
+    /// Called by the UI when the player confirms a new squad.
+    /// </summary>
+    public void ConfirmSquadChange(SquadLoadout loadout)
     {
-        if (onCooldown || loadout == null)
+        if (isUsed || loadout == null)
             return;
 
         StartCoroutine(ChangeSquadRoutine(loadout));
@@ -63,24 +103,38 @@ public class SupplyPointController : MonoBehaviour
 
     private IEnumerator ChangeSquadRoutine(SquadLoadout loadout)
     {
-        onCooldown = true;
         var manager = SquadManager.Instance;
         if (manager != null)
         {
             manager.DeactivateCurrentSquad(despawnDelay);
-            yield return new WaitForSeconds(2f);
-            manager.SpawnSquadFromLoadoutAt(loadout, manager.defaultSpawnPoint.position);
+            yield return new WaitForSeconds(despawnDelay);
+            Vector3 pos = spawnPosition != null ? spawnPosition.position : transform.position;
+            manager.SpawnSquadFromLoadoutAt(loadout, pos);
         }
 
-        yield return new WaitForSeconds(cooldown);
-        onCooldown = false;
+        isUsed = true;
+        canInteract = false;
+        UpdateVisualState();
+
+        Debug.Log("Escuadra reemplazada");
     }
 
-    public void MarkUsed(SquadLoadout loadout)
+    private void UpdateVisualState()
     {
-        if (loadout != null)
-            usedLoadouts.Add(loadout);
-        used = true;
+        if (pointRenderer != null)
+        {
+            pointRenderer.material.color = isUsed ? usedColor : originalColor;
+        }
+
+        if (interactHint != null)
+            interactHint.SetActive(canInteract && !isUsed);
+    }
+
+    // Compatibility method so existing controllers can still call Interact().
+    public void Interact()
+    {
+        if (canInteract && !isUsed)
+            ActivateSupplyPoint();
     }
 }
 
