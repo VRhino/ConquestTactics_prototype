@@ -74,6 +74,7 @@
     <Compile Include="Assets\Scripts/Game/GameManager.cs" />
     <Compile Include="Assets\Scripts/UI/SelectSquadPanel.cs" />
     <Compile Include="Assets\Scripts/UI/PerkEntryUI.cs" />
+    <Compile Include="Assets\Scripts/UI/PerkSlotUI.cs" />
     <Compile Include="Assets\Scripts/UI/PerkPreviewPanel.cs" />
     <Compile Include="Assets\Scripts/UI/HeroViewerPanel.cs" />
     <Compile Include="Assets\Scripts/UI/PreparationPanel.cs" />
