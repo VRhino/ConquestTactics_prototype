@@ -50,6 +50,8 @@ public class BattleManager : MonoBehaviour
     private void StartBattle()
     {
         ChangeState(BattleState.Ongoing);
+        if (BattleTimer.Instance != null)
+            BattleTimer.Instance.StartTimer();
         StartCoroutine(MonitorBattleConditions());
     }
 
@@ -101,6 +103,8 @@ public class BattleManager : MonoBehaviour
             return;
 
         hasBattleEnded = true;
+        if (BattleTimer.Instance != null)
+            BattleTimer.Instance.StopTimer();
         ChangeState(result);
         Debug.Log($"Battle ended with result: {result}");
 
@@ -159,6 +163,15 @@ public class BattleManager : MonoBehaviour
                 count += t.unitCount;
         }
         return count;
+    }
+
+    /// <summary>
+    /// Forces the battle to end in defeat.
+    /// </summary>
+    public void ForceDefeat(string reason)
+    {
+        Debug.Log($"BattleManager forced defeat: {reason}");
+        EndBattle(BattleState.Defeat);
     }
 
     private int GetSurvivingTroopCount()
