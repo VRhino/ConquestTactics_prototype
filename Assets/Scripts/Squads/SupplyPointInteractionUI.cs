@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using System.Collections.Generic;
 
 /// <summary>
 /// UI panel shown when the player interacts with a supply point.
@@ -33,9 +32,8 @@ public class SupplyPointInteractionUI : MonoBehaviour
         if (selectSquadPanel != null)
         {
             var squads = PlayerProfileManager.Instance.GetAllLoadouts();
-            var disabled = new HashSet<SquadLoadout>(point.UsedLoadouts);
             selectSquadPanel.OnSquadSelected = OnSquadSelected;
-            selectSquadPanel.Populate(squads, disabled);
+            selectSquadPanel.Populate(squads, null);
         }
 
         gameObject.SetActive(true);
@@ -77,22 +75,11 @@ public class SupplyPointInteractionUI : MonoBehaviour
 
     private void OnSquadSelected(SquadLoadout loadout)
     {
-        if (loadout != null)
-            StartCoroutine(PerformChange(loadout));
-    }
-
-    private IEnumerator PerformChange(SquadLoadout loadout)
-    {
-        var manager = SquadManager.Instance;
-        if (manager != null)
-        {
-            manager.DeactivateCurrentSquad(currentPoint != null ? currentPoint.despawnDelay : 0f);
-            yield return new WaitForSeconds(currentPoint != null ? currentPoint.despawnDelay : 0f);
-            manager.SpawnSquadFromLoadoutAt(loadout, manager.defaultSpawnPoint.position);
-        }
+        if (loadout == null)
+            return;
 
         if (currentPoint != null)
-            currentPoint.MarkUsed(loadout);
+            currentPoint.ConfirmSquadChange(loadout);
 
         Hide();
     }
