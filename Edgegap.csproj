@@ -68,8 +68,8 @@
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\AppVersionUpdateSessionConfig.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Editor\Api\Models\AppPortsData.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\MatchmakerComponentEnvsUpdate.cs" />
-    <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\MatchmakerReleaseUpdateBase.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\SelectorEnvModel.cs" />
+    <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\MatchmakerReleaseUpdateBase.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\MatchmakerManagedReleaseCreate.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\BulkSessionPost.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Editor\Api\EdgegapWizardApi.cs" />
@@ -121,8 +121,8 @@
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\SessionDelete.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\SessionUser.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\MatchmakerComponentResponse.cs" />
-    <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\SelectorModel.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Enums\ApiEnvironment.cs" />
+    <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\SelectorModel.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\LocationModel.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\MatchmakerManagedReleaseUpdate.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Editor\Api\EdgegapDeploymentsApi.cs" />
@@ -142,11 +142,11 @@
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\AppVersionProbe.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Editor\Api\Models\Results\GetDeploymentsResult.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\SessionContext.cs" />
-    <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\MatchmakerResponse.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Editor\Api\Models\Results\GetRegistryCredentialsResult.cs" />
+    <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\MatchmakerResponse.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\StaticSitesList.cs" />
-    <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\AppCreation.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Editor\EdgegapWindowMetadata.cs" />
+    <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\AppCreation.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\SessionModel.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Enums\ServerStatus.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Dependencies\HttpUtility.cs" />
@@ -155,8 +155,8 @@
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Editor\GithubRelease.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Editor\ButtonShaker.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\Pagination.cs" />
-    <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\MatchmakerReleaseConfigCreate.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\MatchmakerReleaseConfigUpdate.cs" />
+    <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\MatchmakerReleaseConfigCreate.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Editor\Api\EdgegapIpApi.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\TotalMetricsModel.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\Error.cs" />
@@ -187,8 +187,8 @@
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Editor\Api\Models\Results\GetDeploymentStatusResult.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Editor\Api\Models\Results\EdgegapErrorResult.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\Application.cs" />
-    <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\Location.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\ContainerLogStorageModel.cs" />
+    <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\Location.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\Locations.cs" />
     <Compile Include="Assets\Mirror\Hosting\Edgegap\Models\SDK\MatchmakerReleaseCreateBase.cs" />
   </ItemGroup>
@@ -543,6 +543,14 @@
       <HintPath>C:\Program Files\Unity\Hub\Editor\2022.3.62f1\Editor\Data\PlaybackEngines\WindowsStandaloneSupport\UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Mono.CecilX">
+      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.CecilX.Mdb">
+      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Mdb.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.VisualScripting.YamlDotNet">
       <HintPath>Library\PackageCache\com.unity.visualscripting@1.9.4\Editor\VisualScripting.Core\Dependencies\YamlDotNet\Unity.VisualScripting.YamlDotNet.dll</HintPath>
       <Private>False</Private>
@@ -551,12 +559,24 @@
       <HintPath>Library\PackageCache\com.unity.testtools.codecoverage@1.2.6\lib\ReportGenerator\ReportGeneratorMerged.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Mirror.BouncyCastle.Cryptography">
+      <HintPath>Assets\Mirror\Transports\Encryption\Plugins\BouncyCastle\Mirror.BouncyCastle.Cryptography.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.CecilX.Pdb">
+      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Pdb.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="unityplastic">
       <HintPath>Library\PackageCache\com.unity.collab-proxy@2.8.2\Lib\Editor\unityplastic.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Plastic.Antlr3.Runtime">
       <HintPath>Library\PackageCache\com.unity.collab-proxy@2.8.2\Lib\Editor\Unity.Plastic.Antlr3.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.CecilX.Rocks">
+      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Rocks.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Plastic.Newtonsoft.Json">
@@ -571,10 +591,6 @@
       <HintPath>Library\PackageCache\com.unity.visualscripting@1.9.4\Editor\VisualScripting.Core\Dependencies\DotNetZip\Unity.VisualScripting.IonicZip.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="CodeMaestro.UnityMcp.Editor">
-      <HintPath>Library\PackageCache\com.codemaestroai.advancedunitymcp@ca61a94077\Editor\CodeMaestro.UnityMcp.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
       <HintPath>Library\PackageCache\com.unity.visualscripting@1.9.4\Runtime\VisualScripting.Flow\Dependencies\NCalc\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
       <Private>False</Private>
@@ -587,24 +603,8 @@
       <HintPath>Library\PackageCache\com.unity.visualscripting@1.9.4\Editor\VisualScripting.Core\EditorAssetResources\Unity.VisualScripting.TextureAssets.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Mono.CecilX.Mdb">
-      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Mdb.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Mono.CecilX.Pdb">
-      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Pdb.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Mono.CecilX">
-      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Mono.CecilX.Rocks">
-      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Rocks.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Mirror.BouncyCastle.Cryptography">
-      <HintPath>Assets\Mirror\Transports\Encryption\Plugins\BouncyCastle\Mirror.BouncyCastle.Cryptography.dll</HintPath>
+    <Reference Include="CodeMaestro.UnityMcp.Editor">
+      <HintPath>Library\PackageCache\com.codemaestroai.advancedunitymcp@ca61a94077\Editor\CodeMaestro.UnityMcp.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="nunit.framework">

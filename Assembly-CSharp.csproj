@@ -60,26 +60,59 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.62f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\MovementSettings.cs" />
+    <Compile Include="Assets\Scripts\Game\BattleManager.cs" />
+    <Compile Include="Assets\Scripts\UI\PerkEntryUI.cs" />
+    <Compile Include="Assets\Scripts\UI\LoadingScreen.cs" />
+    <Compile Include="Assets\Scripts\Game\EndBattleHandler.cs" />
+    <Compile Include="Assets\Scripts\UI\HeroCardUI.cs" />
+    <Compile Include="Assets\Scripts\Combat\CombatController.cs" />
+    <Compile Include="Assets\Scripts\Squads\SquadCommandSystem.cs" />
+    <Compile Include="Assets\Scripts\Game\HeroData.cs" />
     <Compile Include="Assets\Scripts\UnitController.cs" />
+    <Compile Include="Assets\Scripts\Game\CharacterData.cs" />
+    <Compile Include="Assets\Scripts\Squads\SupplyPointController.cs" />
+    <Compile Include="Assets\Scripts\HeroInputController.cs" />
+    <Compile Include="Assets\Scripts\UI\HeroCreationModal.cs" />
+    <Compile Include="Assets\Scripts\Combat\CombatStats.cs" />
+    <Compile Include="Assets\Scripts\UI\InBattleHUD.cs" />
+    <Compile Include="Assets\Scripts\UI\HeroViewerPanel.cs" />
+    <Compile Include="Assets\Scripts\Game\PlayerProfileManager.cs" />
+    <Compile Include="Assets\Scripts\Squads\SquadInstance.cs" />
     <Compile Include="Assets\Scripts\FormationController.cs" />
+    <Compile Include="Assets\Scripts\Game\SceneDataCarrier.cs" />
+    <Compile Include="Assets\Scripts\UI\PerkSlotUI.cs" />
+    <Compile Include="Assets\Scripts\Game\BattleTimer.cs" />
+    <Compile Include="Assets\Scripts\Squads\SquadStatsTracker.cs" />
+    <Compile Include="Assets\Scripts\AI\ReactionHandler.cs" />
     <Compile Include="Assets\Scripts\FormationData.cs" />
+    <Compile Include="Assets\Scripts\Game\GameManager.cs" />
+    <Compile Include="Assets\Scripts\Squads\SupplyPointInteractionUI.cs" />
+    <Compile Include="Assets\Scripts\Squads\SquadManager.cs" />
+    <Compile Include="Assets\Scripts\Game\EnemyManager.cs" />
+    <Compile Include="Assets\Scripts\Combat\DamageVisualType.cs" />
+    <Compile Include="Assets\Scripts\Squads\TroopData.cs" />
+    <Compile Include="Assets\Scripts\AI\FSMDebugger.cs" />
+    <Compile Include="Assets\Scripts\Game\PerkData.cs" />
+    <Compile Include="Assets\Scripts\Squads\SquadSelectorUI.cs" />
+    <Compile Include="Assets\Scripts\Combat\DefenseStats.cs" />
+    <Compile Include="Assets\Scripts\Combat\DamageCalculator.cs" />
+    <Compile Include="Assets\Scripts\UI\SelectSquadPanel.cs" />
     <Compile Include="Assets\Scripts\UnitAIController.cs" />
+    <Compile Include="Assets\Scripts\UI\BattleResultsUI.cs" />
+    <Compile Include="Assets\Scripts\UI\CharacterSelectionPanel.cs" />
+    <Compile Include="Assets\Scripts\Combat\PhysicalDamageType.cs" />
     <Compile Include="Assets\Scripts\HealthComponent.cs" />
+    <Compile Include="Assets\Scripts\Game\PlayerProfileData.cs" />
+    <Compile Include="Assets\Scripts\UI\PerkPreviewPanel.cs" />
+    <Compile Include="Assets\Scripts\AI\EnemyDetectionSensor.cs" />
+    <Compile Include="Assets\Scripts\Game\SceneLoader.cs" />
+    <Compile Include="Assets\Scripts\Game\BattleResultData.cs" />
     <Compile Include="Assets\Scripts\PlayerMovement.cs" />
-    <Compile Include="Assets\Scripts/Game/PlayerData.cs" />
-    <Compile Include="Assets\Scripts/Game/CharacterData.cs" />
-    <Compile Include="Assets\Scripts/Game/PerkData.cs" />
-    <Compile Include="Assets\Scripts/Game/PlayerProfileManager.cs" />
-    <Compile Include="Assets\Scripts/Game/PlayerProfileData.cs" />
-    <Compile Include="Assets\Scripts/Game/GameManager.cs" />
-    <Compile Include="Assets\Scripts/UI/SelectSquadPanel.cs" />
-    <Compile Include="Assets\Scripts/UI/PerkEntryUI.cs" />
-    <Compile Include="Assets\Scripts/UI/PerkSlotUI.cs" />
-    <Compile Include="Assets\Scripts/UI/PerkPreviewPanel.cs" />
-    <Compile Include="Assets\Scripts/UI/HeroViewerPanel.cs" />
-    <Compile Include="Assets\Scripts/UI/PreparationPanel.cs" />
-    <Compile Include="Assets\Scripts/UI/LoginManager.cs" />
-    <Compile Include="Assets\Scripts/Game/Matchmaker.cs" />
+    <Compile Include="Assets\Scripts\Game\Matchmaker.cs" />
+    <Compile Include="Assets\Scripts\UI\LoginManager.cs" />
+    <Compile Include="Assets\Scripts\UI\PreparationPanel.cs" />
+    <Compile Include="Assets\Scripts\Squads\SquadLoadout.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll" />
@@ -434,8 +467,28 @@
       <HintPath>C:\Program Files\Unity\Hub\Editor\2022.3.62f1\Editor\Data\Managed\UnityEngine\UnityEditor.UnityConnectModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Mono.CecilX">
+      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.CecilX.Mdb">
+      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Mdb.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="ReportGeneratorMerged">
       <HintPath>Library\PackageCache\com.unity.testtools.codecoverage@1.2.6\lib\ReportGenerator\ReportGeneratorMerged.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mirror.BouncyCastle.Cryptography">
+      <HintPath>Assets\Mirror\Transports\Encryption\Plugins\BouncyCastle\Mirror.BouncyCastle.Cryptography.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.CecilX.Pdb">
+      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Pdb.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.CecilX.Rocks">
+      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Rocks.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
@@ -444,26 +497,6 @@
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>Library\PackageCache\com.unity.nuget.newtonsoft-json@3.2.1\Runtime\Newtonsoft.Json.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Mono.CecilX.Mdb">
-      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Mdb.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Mono.CecilX.Pdb">
-      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Pdb.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Mono.CecilX">
-      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Mono.CecilX.Rocks">
-      <HintPath>Assets\Mirror\Plugins\Mono.Cecil\Mono.CecilX.Rocks.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Mirror.BouncyCastle.Cryptography">
-      <HintPath>Assets\Mirror\Transports\Encryption\Plugins\BouncyCastle\Mirror.BouncyCastle.Cryptography.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="netstandard">
