@@ -52,7 +52,7 @@ public class PreparationPanel : MonoBehaviour
         var hero = PlayerProfileManager.Instance.GetActiveHero();
         heroViewerPanel.LoadHero(hero);
         if (hero != null)
-            perkPreviewPanel.Populate(hero.passivePerks);
+            perkPreviewPanel.ShowPerks(hero.passivePerks);
     }
 
     private void ShowPanel(GameObject target)

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -27,6 +28,9 @@ public class HeroData
     public int defenseBlunt;
 
     public float movementSpeed;
+
+    [Header("Passive Perks")]
+    public List<PerkData> passivePerks = new();
 
     public Sprite icon;
     public GameObject modelPrefab;

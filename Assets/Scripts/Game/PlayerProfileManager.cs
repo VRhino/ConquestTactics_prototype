@@ -116,6 +116,9 @@ public class PlayerProfileManager : MonoBehaviour
             movementSpeed = 5f
         };
 
+        // Optionally populate example perks if any exist in Resources
+        defaultHero.passivePerks = new List<PerkData>(Resources.LoadAll<PerkData>(string.Empty));
+
         currentProfile.heroes.Add(defaultHero);
         currentProfile.activeHero = defaultHero;
     }
