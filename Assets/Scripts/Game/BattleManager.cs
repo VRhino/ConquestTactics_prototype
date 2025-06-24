@@ -50,6 +50,8 @@ public class BattleManager : MonoBehaviour
     private void StartBattle()
     {
         ChangeState(BattleState.Ongoing);
+        if (BattleTimer.Instance != null)
+            BattleTimer.Instance.StartTimer();
         StartCoroutine(MonitorBattleConditions());
     }
 
@@ -104,6 +106,9 @@ public class BattleManager : MonoBehaviour
         ChangeState(result);
         Debug.Log($"Battle ended with result: {result}");
 
+        if (BattleTimer.Instance != null)
+            BattleTimer.Instance.StopTimer();
+
         BattleResultData data = BuildResultData(result);
 
         OnBattleEnd?.Invoke(result);
@@ -120,7 +125,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private BattleResultData BuildResultData(BattleState result)
     {
-        float time = BattleTimer.GetElapsedTime();
+        float time = BattleTimer.Instance != null ? BattleTimer.Instance.GetElapsedTime() : 0f;
         string name = GetSquadName();
 
         int initial = GetInitialTroopCount();
@@ -135,6 +140,15 @@ public class BattleManager : MonoBehaviour
             battleDuration = time,
             enemiesDefeated = 0
         };
+    }
+
+    /// <summary>
+    /// Forces the battle to end in defeat with a reason for debugging.
+    /// </summary>
+    public void ForceDefeat(string reason)
+    {
+        Debug.Log($"Force defeat called: {reason}");
+        EndBattle(BattleState.Defeat);
     }
 
     /// <summary>
